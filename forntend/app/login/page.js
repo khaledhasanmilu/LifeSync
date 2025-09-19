@@ -19,7 +19,7 @@ export default function LoginPage() {
       setIsLoading(false);
     
       alert("Login successful! (Demo only)");
-      router.push("/dashboard"); // Redirect to dashboard after login
+      router.push("afterAuth/dashboard"); // Redirect to dashboard after login
     }, 2000);
   };
 

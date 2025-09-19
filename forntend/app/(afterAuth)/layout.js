@@ -1,29 +1,49 @@
-// components/Layout.js
-"use client";
-import { useState } from 'react';
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
   BarChart3, DollarSign, CheckSquare, BookOpen, MapPin, AlertTriangle, Zap,
-  User, Bell, Settings, LogOut, ChevronDown, TrendingUp, TrendingDown,
-  Clock, Target, Coffee, Smile, Meh, Frown, Heart, Plus
+  User, Bell, Settings, LogOut, ChevronDown
 } from 'lucide-react';
 
-export default function Layout({ children, activePage, setActivePage }) {
+export default function Layout({ children }) {
+  const router = useRouter();
+  const pathname = usePathname(); // current URL path
+  const [activePage, setActivePage] = useState('Dashboard');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
+  // Set active page based on path
+  useEffect(() => {
+    if (pathname.includes('dashboard')) setActivePage('Dashboard');
+    else if (pathname.includes('finance')) setActivePage('Finance');
+    else if (pathname.includes('todo')) setActivePage('Todo');
+    else if (pathname.includes('learning')) setActivePage('Learning');
+    else if (pathname.includes('travel')) setActivePage('Travel');
+    else if (pathname.includes('emergency')) setActivePage('Emergency');
+    else if (pathname.includes('quickdock')) setActivePage('QuickDock');
+  }, [pathname]);
+
   const sidebarItems = [
-    { id: 'Dashboard', icon: <BarChart3 className="w-5 h-5" />, label: 'Dashboard' },
-    { id: 'Finance', icon: <DollarSign className="w-5 h-5" />, label: 'Finance Tracker' },
-    { id: 'Todo', icon: <CheckSquare className="w-5 h-5" />, label: 'To-Do' },
-    { id: 'Learning', icon: <BookOpen className="w-5 h-5" />, label: 'Learning Queue' },
-    { id: 'Travel', icon: <MapPin className="w-5 h-5" />, label: 'Travel Tracker' },
-    { id: 'Emergency', icon: <AlertTriangle className="w-5 h-5" />, label: 'Emergency Alert' },
-    { id: 'QuickDock', icon: <Zap className="w-5 h-5" />, label: 'QuickDock' },
+    { id: 'Dashboard', label: 'Dashboard', icon: <BarChart3 className="w-5 h-5" />, path: '/afterAuth/dashboard' },
+    { id: 'Finance', label: 'Finance Tracker', icon: <DollarSign className="w-5 h-5" />, path: '/afterAuth/finance' },
+    { id: 'Todo', label: 'To-Do', icon: <CheckSquare className="w-5 h-5" />, path: '/afterAuth/todo' },
+    { id: 'Learning', label: 'Learning Queue', icon: <BookOpen className="w-5 h-5" />, path: '/afterAuth/learning' },
+    { id: 'Travel', label: 'Travel Tracker', icon: <MapPin className="w-5 h-5" />, path: '/afterAuth/travel' },
+    { id: 'Emergency', label: 'Emergency Alert', icon: <AlertTriangle className="w-5 h-5" />, path: '/afterAuth/emergency' },
+    { id: 'QuickDock', label: 'QuickDock', icon: <Zap className="w-5 h-5" />, path: '/afterAuth/quickdock' },
   ];
 
+  const handleNavigate = (path, id) => {
+    setActivePage(id);
+    router.push(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 to-blue-50">
+      
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-xl border-r border-gray-100 flex flex-col">
+        {/* Logo */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
@@ -32,12 +52,14 @@ export default function Layout({ children, activePage, setActivePage }) {
             <span className="text-xl font-bold text-gray-800">LifeSync</span>
           </div>
         </div>
+
+        {/* Navigation */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {sidebarItems.map((item) => (
               <li key={item.id}>
                 <button
-                  onClick={() => setActivePage(item.id)}
+                  onClick={() => handleNavigate(item.path, item.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     activePage === item.id
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
@@ -59,11 +81,15 @@ export default function Layout({ children, activePage, setActivePage }) {
         <header className="bg-white shadow-sm border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-800">{activePage}</h1>
+
             <div className="flex items-center space-x-4">
+              {/* Notifications */}
               <button className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
+
+              {/* Profile Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -74,6 +100,7 @@ export default function Layout({ children, activePage, setActivePage }) {
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
+
                 {showProfileDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                     <button className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
@@ -92,9 +119,7 @@ export default function Layout({ children, activePage, setActivePage }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );

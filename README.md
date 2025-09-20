@@ -67,3 +67,11 @@ LifeSync is a personal dashboard to organize your daily tasks, finances, and tra
     npm run dev
     ```
 3.  Open your browser and navigate to `http://localhost:3000`.
+
+---
+
+## Contributors ✨
+
+- [Khaled Hasan Milu](https://github.com/khaledhasanmilu)  
+- [Sumiya Akter Subarna](https://github.com/Subarna-007)  
+- [Minhazul Islam Sizan](https://github.com/sizan2119254)  

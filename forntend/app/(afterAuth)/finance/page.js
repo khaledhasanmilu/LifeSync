@@ -195,12 +195,12 @@ const FinanceTracker = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-gray-800">Finance</h1>
             <p className="text-gray-600">
               {currentView === 'dashboard' ? 'Track your money, achieve your goals' : 'Manage your finances'}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* View Toggle */}

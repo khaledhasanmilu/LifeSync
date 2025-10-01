@@ -172,12 +172,12 @@ const TravelTracker = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-gray-800">Travel</h1>
             <p className="text-gray-600">
               {selectedTrip ? `Managing ${selectedTrip.name}` : 'Plan your trips with packing & budget'}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {!selectedTrip && (

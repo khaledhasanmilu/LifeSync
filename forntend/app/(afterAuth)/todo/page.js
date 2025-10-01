@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
 import {
   Search, Plus, Calendar, Clock, Flag, CheckSquare, Square, Edit3, Trash2, 
@@ -709,12 +709,12 @@ const LifeSyncToDo = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-gray-800">ToDo</h1>
             <p className="text-gray-600">
               {currentView === 'dashboard' ? 'Organize your life, one task at a time' : 'Manage your tasks'}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* View Toggle */}

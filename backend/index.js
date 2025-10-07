@@ -1,19 +1,24 @@
 const express = require('express');
-const userRoutes = require('./routes/userRouts')
+const cors = require('cors');
+const userRoutes = require('./routes/userRouts');
+const todoRoutes = require('./routes/todoRoutes');
 
 const app = express();
+
+// Middleware
+app.use(cors());
 app.use(express.json());
 
 // Default route
 app.get('/', (req, res) => {
-  res.send('Server is running...');
+  res.send('🚀 LifeSync Backend Server is running...');
 });
 
-// User routes
-app.use('/users', userRoutes);
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/todos', todoRoutes);
 
-
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

@@ -55,4 +55,43 @@ const signupUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, signupUser };
+// Login user
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
+      if (err) {
+        console.error('Error checking user:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const user = results[0];
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      // Don't send password in response
+      const { password: userPassword, ...userWithoutPassword } = user;
+      res.json({ 
+        message: 'Login successful', 
+        user: userWithoutPassword 
+      });
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = { getUsers, signupUser, loginUser };

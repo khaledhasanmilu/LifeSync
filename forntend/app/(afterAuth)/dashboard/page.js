@@ -1,11 +1,19 @@
 "use client";
 import React, { useState } from 'react';
+import Cookies from 'js-cookie';
 import {
+
   DollarSign, CheckSquare, Plus, Clock, Target, Coffee, Smile, Meh, Frown,
   Heart, TrendingUp, TrendingDown, Sparkles, Sun, Moon
 } from 'lucide-react';
 
 export default function LifeSyncDashboard() {
+  // Try different casing and check for cookie existence
+  const username = Cookies.get('userName') || Cookies.get('username') || 'Guest';
+  console.log('Username from cookies:', username);
+
+  // Optionally, show a fallback if username is still undefined
+  // const username = Cookies.get('userName') || 'Guest';
   const [todayMood, setTodayMood] = useState('happy');
   const [completedTasks, setCompletedTasks] = useState([false, false, false, true]);
 
@@ -55,10 +63,11 @@ export default function LifeSyncDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col">
 
-      {/* Top Bar */}
+    
+
       <header className="px-6 py-6 rounded-b-2xl">
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome back, <span className="text-blue-600">Khaled</span>!
+          Welcome back, <span className="text-blue-600">{username}</span>!
         </h1>
         <p className="mt-1 text-gray-600">Here's your life overview.</p>
       </header>

@@ -11,16 +11,29 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const res = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // allow cookies from backend
+      });
+
+      if (!res.ok) {
+        throw new Error("Login failed");
+      }
+
+      // No need to manually set cookies if backend sets them via Set-Cookie header
+      router.push("/dashboard");
+    } catch (error) {
+      alert("Login failed. Please check your credentials.");
+    } finally {
       setIsLoading(false);
-    
-      alert("Login successful! (Demo only)");
-      router.push("afterAuth/dashboard"); // Redirect to dashboard after login
-    }, 2000);
+    }
   };
 
   return (

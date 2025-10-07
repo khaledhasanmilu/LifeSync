@@ -6,7 +6,10 @@ const todoRoutes = require('./routes/todoRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3001',
+  credentials: true
+}));
 app.use(express.json());
 
 // Default route

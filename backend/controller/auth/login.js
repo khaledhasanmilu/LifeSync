@@ -8,7 +8,9 @@ const getUsers = (req, res) => {
       console.error('Error executing query:', err);
       res.status(500).json({ error: 'Database error' });
     } else {
-      res.json(results);
+      // Remove password from each user object
+      const users = results.map(({ password, ...user }) => user);
+      res.json(users);
     }
   });
 };
@@ -80,6 +82,10 @@ const loginUser = async (req, res) => {
       if (!isPasswordValid) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
+
+      // Set cookies for user id and name
+      res.cookie('userId', user.id, { httpOnly: true });
+      res.cookie('userName', user.name, { httpOnly: true });
 
       // Don't send password in response
       const { password: userPassword, ...userWithoutPassword } = user;

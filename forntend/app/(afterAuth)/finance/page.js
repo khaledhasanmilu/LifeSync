@@ -28,6 +28,7 @@ import {
 
 const FinanceTracker = () => {
   const [currentView, setCurrentView] = useState('dashboard');
+
   const [transactions, setTransactions] = useState([
     { id: 1, type: 'income', amount: 5000, category: 'Salary', description: 'Monthly Salary', date: '2025-08-01' },
     { id: 2, type: 'expense', amount: 800, category: 'Food', description: 'Groceries', date: '2025-08-03' },
@@ -36,13 +37,51 @@ const FinanceTracker = () => {
   ]);
 
   const [budgets, setBudgets] = useState([
-    { category: 'Food', limit: 1000, spent: 800 },
-    { category: 'Transport', limit: 500, spent: 300 },
-    { category: 'Bills', limit: 1500, spent: 1200 },
-    { category: 'Shopping', limit: 400, spent: 0 },
-    { category: 'Healthcare', limit: 300, spent: 0 },
-    { category: 'Entertainment', limit: 200, spent: 0 }
-  ]);
+  // Example budgets
+  { category: 'Food', limit: 1000, spent: 800 },
+  { category: 'Transport', limit: 500, spent: 300 },
+  { category: 'Bills', limit: 1500, spent: 1200 },
+  { category: 'Shopping', limit: 400, spent: 0 },
+  { category: 'Healthcare', limit: 300, spent: 0 },
+  { category: 'Entertainment', limit: 200, spent: 0 }
+]);
+
+const fetchUserID = async () => {
+  const res = await fetch("/api/usr");
+  const data = await res.json();
+  return data.userId; // return it for immediate use
+};
+
+useEffect(() => {
+  
+   async function fetchBudgets() {
+     const userID = await fetchUserID();
+    try {
+      const res = await fetch(`http://localhost:3001/api/budget/${userID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Raw API data:', data);
+        // CRITICAL: Convert string numbers to actual numbers
+        const normalized = data.map(b => ({
+          id: b.id,
+          category: b.category,
+          limit: parseFloat(b.limit),
+          spent: parseFloat(b.spent)
+        }));
+        console.log('Normalized budgets:', normalized);
+        setBudgets(normalized);
+      }
+    } catch (err) {
+      console.error('Error fetching budgets:', err);
+    }
+  }
+  fetchBudgets();
+}, []);
 
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAddStep, setQuickAddStep] = useState(1);
@@ -69,9 +108,31 @@ const FinanceTracker = () => {
   };
 
   // Calculate totals
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  const totalSavings = totalIncome - totalExpenses;
+  const [totals, setTotals] = useState({ totalIncome: 0, totalExpense: 0, current: 0 });
+
+  useEffect(() => {
+    async function fetchTotals() {
+      const userID = await fetchUserID();
+      try {
+        const res = await fetch(`http://localhost:3001/api/income-expense/${userID}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTotals({
+            totalIncome: parseFloat(data.total_income) || 0,
+            totalExpense: parseFloat(data.total_expense) || 0,
+            current: parseFloat(data.saving) || 0
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching totals:', err);
+      }
+    }
+    fetchTotals();
+  }, []);
+
+  const totalIncome = totals.totalIncome;
+  const totalExpenses = totals.totalExpense;
+  const totalSavings = totals.current;
 
   // Update budget spent amounts when transactions change
   useEffect(() => {
@@ -84,7 +145,7 @@ const FinanceTracker = () => {
     setBudgets(updatedBudgets);
   }, [transactions]);
 
-  const handleQuickAdd = () => {
+  const handleQuickAdd = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
 
     const transaction = {
@@ -94,31 +155,85 @@ const FinanceTracker = () => {
       date: new Date().toISOString().split('T')[0]
     };
 
+    // Add to local state immediately
     setTransactions([...transactions, transaction]);
     setNewTransaction({ type: 'expense', amount: '', category: 'Food', description: '' });
     setShowQuickAdd(false);
     setQuickAddStep(1);
+
+    // Send to API
+    try {
+      const userID = await fetchUserID();
+      await fetch("http://localhost:3001/api/income-expense", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userID,
+          type: transaction.type,
+          amount: transaction.amount,
+          category: transaction.category,
+
+        })
+      });
+    } catch (err) {
+      console.error("Error adding transaction:", err);
+    }
   };
 
-  const handleBudgetSave = () => {
+  const handleBudgetSave = async () => {
     if (!budgetForm.category || !budgetForm.limit) return;
+    const userID = await fetchUserID();
 
-    if (editingBudget !== null) {
-      // Edit existing budget
-      const updatedBudgets = budgets.map((budget, index) => 
-        index === editingBudget 
-          ? { ...budget, category: budgetForm.category, limit: parseFloat(budgetForm.limit) }
-          : budget
-      );
-      setBudgets(updatedBudgets);
-    } else {
-      // Add new budget
-      const newBudget = {
-        category: budgetForm.category,
-        limit: parseFloat(budgetForm.limit),
-        spent: 0
-      };
-      setBudgets([...budgets, newBudget]);
+    try {
+      if (editingBudget !== null) {
+        // Edit existing budget
+        await fetch(`http://localhost:3001/api/budget/${editingBudget}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: userID,
+            area: budgetForm.category,
+            amount: parseFloat(budgetForm.limit)
+          })
+        });
+      } else {
+        // Add new budget
+        await fetch("http://localhost:3001/api/budget", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: userID,
+            area: budgetForm.category,
+            amount: parseFloat(budgetForm.limit)
+          })
+        });
+      }
+
+      // Always fetch latest budgets after save
+      const res = await fetch(`http://localhost:3001/api/budget/${userID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const normalized = data.map(b => ({
+          id: b.id,
+          category: b.category,
+          limit: parseFloat(b.limit),
+          spent: parseFloat(b.spent)
+        }));
+        setBudgets(normalized);
+      }
+    } catch (err) {
+      console.error('Error saving budget:', err);
     }
 
     setBudgetForm({ category: 'Food', limit: '' });
@@ -132,13 +247,41 @@ const FinanceTracker = () => {
       category: budget.category,
       limit: budget.limit.toString()
     });
-    setEditingBudget(index);
+    setEditingBudget(budget.id);
     setShowBudgetForm(true);
   };
 
-  const handleDeleteBudget = (index) => {
+  const handleDeleteBudget = async (index) => {
     if (window.confirm('Are you sure you want to delete this budget?')) {
-      setBudgets(budgets.filter((_, i) => i !== index));
+      const budget = budgets[index];
+      const userID = await fetchUserID();
+      try {
+        await fetch(`http://localhost:3001/api/budget/${budget.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        // Refresh budgets after delete
+        const res = await fetch(`http://localhost:3001/api/budget/${userID}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const normalized = data.map(b => ({
+            id: b.id,
+            category: b.category,
+            limit: parseFloat(b.limit),
+            spent: parseFloat(b.spent)
+          }));
+          setBudgets(normalized);
+        }
+      } catch (err) {
+        console.error('Error deleting budget:', err);
+      }
     }
   };
 

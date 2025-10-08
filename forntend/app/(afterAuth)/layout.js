@@ -24,13 +24,13 @@ export default function Layout({ children }) {
   }, [pathname]);
 
   const sidebarItems = [
-    { id: 'Dashboard', label: 'Dashboard', icon: <BarChart3 className="w-5 h-5" />, path: '/afterAuth/dashboard' },
-    { id: 'Finance', label: 'Finance Tracker', icon: <DollarSign className="w-5 h-5" />, path: '/afterAuth/finance' },
-    { id: 'Todo', label: 'To-Do', icon: <CheckSquare className="w-5 h-5" />, path: '/afterAuth/todo' },
-    { id: 'Learning', label: 'Learning Queue', icon: <BookOpen className="w-5 h-5" />, path: '/afterAuth/learning' },
-    { id: 'Travel', label: 'Travel Tracker', icon: <MapPin className="w-5 h-5" />, path: '/afterAuth/travel' },
-    { id: 'Emergency', label: 'Emergency Alert', icon: <AlertTriangle className="w-5 h-5" />, path: '/afterAuth/emergency' },
-    { id: 'QuickDock', label: 'QuickDock', icon: <Zap className="w-5 h-5" />, path: '/afterAuth/quickdock' },
+    { id: 'Dashboard', label: 'Dashboard', icon: <BarChart3 className="w-5 h-5" />, path: '/dashboard' },
+    { id: 'Finance', label: 'Finance Tracker', icon: <DollarSign className="w-5 h-5" />, path: '/finance' },
+    { id: 'Todo', label: 'To-Do', icon: <CheckSquare className="w-5 h-5" />, path: '/todo' },
+    { id: 'Learning', label: 'Learning Queue', icon: <BookOpen className="w-5 h-5" />, path: '/learning' },
+    { id: 'Travel', label: 'Travel Tracker', icon: <MapPin className="w-5 h-5" />, path: '/travel' },
+    { id: 'Emergency', label: 'Emergency Alert', icon: <AlertTriangle className="w-5 h-5" />, path: '/emergency' },
+    { id: 'QuickDock', label: 'QuickDock', icon: <Zap className="w-5 h-5" />, path: '/quickdock' },
   ];
 
   const handleNavigate = (path, id) => {

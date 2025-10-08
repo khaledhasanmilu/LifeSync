@@ -1,6 +1,5 @@
 "use client";
-import React, { useState } from 'react';
-import Cookies from 'js-cookie';
+import React, { useState,useEffect } from 'react';
 import {
 
   DollarSign, CheckSquare, Plus, Clock, Target, Coffee, Smile, Meh, Frown,
@@ -9,11 +8,7 @@ import {
 
 export default function LifeSyncDashboard() {
   // Try different casing and check for cookie existence
-  const username = Cookies.get('userName') || Cookies.get('username') || 'Guest';
-  console.log('Username from cookies:', username);
-
-  // Optionally, show a fallback if username is still undefined
-  // const username = Cookies.get('userName') || 'Guest';
+  const [username, setUsername] = useState('Guest');
   const [todayMood, setTodayMood] = useState('happy');
   const [completedTasks, setCompletedTasks] = useState([false, false, false, true]);
 
@@ -23,6 +18,14 @@ export default function LifeSyncDashboard() {
     { id: 3, title: 'Plan weekend trip', priority: 'low' },
     { id: 4, title: 'Call dentist for appointment', priority: 'medium' },
   ];
+
+ 
+
+  useEffect(() => {
+    fetch("/api/usr")
+      .then(res => res.json())
+      .then(data => setUsername(data.username));
+  }, []);
 
   const timeCategories = [
     { name: 'Work', hours: 6, color: 'bg-blue-500' },

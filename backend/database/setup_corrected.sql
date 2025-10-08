@@ -93,3 +93,13 @@ CREATE TABLE travel_plans (
 
 -- Show all created tables
 SHOW TABLES;
+-- Budget table for user-defined budgets in specific areas
+CREATE TABLE budget (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    area VARCHAR(100) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);

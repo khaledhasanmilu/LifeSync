@@ -4,6 +4,9 @@ const userRoutes = require('./routes/userRouts');
 const todoRoutes = require('./routes/todoRoutes');
 const budgetRoutes = require('./routes/budgetRoute');
 const incomeExpenseRoutes = require('./routes/incomeExpense');
+
+const learningRoutes = require('./routes/learningRoutes');
+const travelPlanRoutes = require('./routes/travelPlanRoutes');
 const app = express();
 
 // Middleware
@@ -24,6 +27,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/income-expense', incomeExpenseRoutes);
+app.use('/api/learnings', learningRoutes);
+app.use('/api/travel-plans', travelPlanRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -25,6 +25,17 @@ export default function LifeSyncWelcome() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    fetch("/api/usr")
+      .then(res => res.json())
+      .then(data => {
+        if(data.username && data.userId) {
+          window.location.href = "/dashboard";
+        }
+      });
+    
+  }, []);
+
+  useEffect(() => {
     setIsVisible(true);
     const interval = setInterval(() => {
       setCurrentFeature(prev => (prev + 1) % features.length);
@@ -116,7 +127,7 @@ export default function LifeSyncWelcome() {
             Features
           </button>
           <button className="px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg text-white transition-all duration-300">
-            <Link href="/signup">Sign In</Link>
+            <Link href="/login">Sign In</Link>
           </button>
         </div>
       </nav>

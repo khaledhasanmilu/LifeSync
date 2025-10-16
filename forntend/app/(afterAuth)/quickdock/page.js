@@ -182,10 +182,10 @@ const QuickDoc = () => {
       {currentView === 'home' ? (
         <div className="space-y-6">
           {/* Header */}
-          <div>
+          {/* <div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Platform Directory</h2>
             <p className="text-gray-600">Quick access to your most-used websites and services</p>
-          </div>
+          </div> */}
 
           {/* Search Bar */}
           <div className="relative max-w-2xl">

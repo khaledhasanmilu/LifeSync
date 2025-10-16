@@ -11,14 +11,26 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://localhost:3001/api/users/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.message || "Signup failed");
+      } else {
+        alert("Signup successful!");
+      }
+    } catch (err) {
+      alert("Network error");
+    } finally {
       setIsLoading(false);
-      alert("Signup successful! (Demo only)");
-    }, 2000);
+    }
   };
 
   return (

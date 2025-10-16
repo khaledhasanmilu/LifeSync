@@ -6,28 +6,40 @@ import {
 } from 'lucide-react';
 
 const TravelTracker = () => {
-  const [currentView, setCurrentView] = useState('dashboard');
+  // Removed unused currentView state
   const [idCounter, setIdCounter] = useState(2); // Start from 2 since we have sample data with id 1
-  const [trips, setTrips] = useState([
-    {
-      id: 1,
-      name: 'Summer Vacation',
-      destination: 'Bali, Indonesia',
-      startDate: '2024-07-15',
-      endDate: '2024-07-25',
-      budget: 2000,
-      notes: 'Day 1: Arrival & beach\nDay 2: Temple tour\nDay 3: Rice terraces',
-      packingList: [
-        { id: 1, name: 'Passport', packed: true },
-        { id: 2, name: 'Sunscreen', packed: false },
-        { id: 3, name: 'Camera', packed: true }
-      ],
-      expenses: [
-        { id: 1, name: 'Flight', amount: 800, date: '2024-06-15' },
-        { id: 2, name: 'Hotel', amount: 600, date: '2024-06-20' }
-      ]
+  const [trips, setTrips] = useState([]);
+  const fetchUserID = async () => {
+  const res = await fetch("/api/usr");
+  const data = await res.json();
+  return data.userId; // return it for immediate use
+  };
+
+  React.useEffect(() => {
+    async function fetchData() {
+      const userId = await fetchUserID();
+      console.log("User ID:", userId);
+    
+      async function loadTrips(userId) {
+        const res = await fetch(`http://localhost:3001/api/travel-plans/${userId}`);
+        const data = await res.json();
+        const mappedTrips = data.map(trip => ({
+          id: trip.id,
+          name: trip.destination,
+          destination: trip.destination,
+          startDate: trip.start_date ? trip.start_date.split('T')[0] : '',
+          endDate: trip.end_date ? trip.end_date.split('T')[0] : '',
+          budget: parseFloat(trip.budget) || 0,
+          notes: trip.description || '',
+          packingList: trip.packingList ? trip.packingList.map((item) => ({ id: item.id, name: item.name, packed: item.packed })) : [],
+          expenses: trip.expenses ? trip.expenses.map((exp) => ({ id: exp.id, name: exp.name, amount: parseFloat(exp.amount), date: exp.date })) : []
+        }));
+        setTrips(mappedTrips);
+      }
+      await loadTrips(userId);
     }
-  ]);
+    fetchData();
+  }, []);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
@@ -39,44 +51,79 @@ const TravelTracker = () => {
     budget: '',
     notes: ''
   });
-  const [newPackingItem, setNewPackingItem] = useState('');
-  const [newExpense, setNewExpense] = useState({ name: '', amount: '' });
+  const [newPackingItem, setNewPackingItem] = useState({id: 0, name: '' , packed: false });
+  const [newExpense, setNewExpense] = useState({id: 0, name: '', amount: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const generateId = () => {
-    const newId = idCounter;
-    setIdCounter(prev => prev + 1);
-    return newId;
-  };
+ 
 
   const formatCurrency = (amount) => `${amount.toLocaleString()}`;
   const formatDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-  const handleSaveTrip = () => {
+  const handleSaveTrip = async () => {
+    console.log("Saving trip:", trips);
+    const userId = await fetchUserID();
     if (!newTrip.name || !newTrip.destination) return;
 
     if (editingTrip) {
       const updatedTrip = { 
-        ...editingTrip, 
-        ...newTrip, 
-        budget: parseFloat(newTrip.budget) || 0 
+      ...editingTrip, 
+      ...newTrip, 
+      budget: parseFloat(newTrip.budget) || 0 
       };
+      // Update trip in backend
+      const updatedTripData = {
+      user_id: userId,
+      destination: updatedTrip.destination,
+      start_date: updatedTrip.startDate,
+      end_date: updatedTrip.endDate,
+      budget: updatedTrip.budget,
+      description: updatedTrip.notes,
+      status: null
+      };
+
+      await fetch(`http://localhost:3001/api/travel-plans/${editingTrip.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedTripData)
+      });
       setTrips(trips.map(t => t.id === editingTrip.id ? updatedTrip : t));
       if (selectedTrip?.id === editingTrip.id) {
-        setSelectedTrip(updatedTrip);
+      setSelectedTrip(updatedTrip);
       }
     } else {
-      const trip = {
-        id: generateId(),
-        ...newTrip,
+      // Create trip in backend
+      const newTripData = {
+        user_id: userId,
+        name: newTrip.name,
+        destination: newTrip.destination,
+        start_date: newTrip.startDate,
+        end_date: newTrip.endDate,
         budget: parseFloat(newTrip.budget) || 0,
+        description: newTrip.notes,
+        status: null
+      };
+      const res = await fetch(`http://localhost:3001/api/travel-plans`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTripData)
+      });
+      const createdTrip = await res.json();
+      const trip = {
+        id: createdTrip.travelPlanId, // Use backend-generated id
+        name: newTrip.name,
+        destination: newTrip.destination,
+        startDate: newTrip.startDate,
+        endDate: newTrip.endDate,
+        budget: parseFloat(newTrip.budget) || 0,
+        notes: newTrip.notes,
         packingList: [],
         expenses: []
       };
       setTrips([...trips, trip]);
     }
 
-    setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', notes: '' });
+    setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', notes: '' ,expenses: [], packingList: []});
     setShowTripForm(false);
     setEditingTrip(null);
   };
@@ -96,36 +143,79 @@ const TravelTracker = () => {
 
   const handleDeleteTrip = (tripId) => {
     if (window.confirm('Delete this trip?')) {
+      // Call backend API to delete the trip
+      fetch(`http://localhost:3001/api/travel-plans/${tripId}`, {
+      method: 'DELETE',
+      }).then(() => {
       setTrips(trips.filter(t => t.id !== tripId));
       if (selectedTrip?.id === tripId) {
         setSelectedTrip(null);
       }
+      });
     }
   };
 
-  const addPackingItem = () => {
+  const addPackingItem = async () => {
     if (!newPackingItem.trim()) return;
+    // Send new packing item to backend
+    const packingItemData = {
+      name: newPackingItem.trim(),
+      packed: false
+    };
+    const res = await fetch(`http://localhost:3001/api/travel-plans/${selectedTrip.id}/item`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(packingItemData)
+    });
+    const createdItem = await res.json();
+    // Use backend-generated id
     const updatedTrip = {
       ...selectedTrip,
-      packingList: [...selectedTrip.packingList, { id: generateId(), name: newPackingItem.trim(), packed: false }]
+      packingList: [
+        ...selectedTrip.packingList,
+        { id: createdItem.itemId, name: newPackingItem.trim(), packed: false }
+      ]
     };
     setSelectedTrip(updatedTrip);
     setTrips(trips.map(t => t.id === selectedTrip.id ? updatedTrip : t));
     setNewPackingItem('');
   };
 
-  const togglePacked = (itemId) => {
+  const togglePacked = async (itemID) => {
+
+    console.log("Selected Trip:", selectedTrip);
+    console.log("Packing List:", selectedTrip.packingList);
+    console.log("Item ID to toggle:", itemID);
+
+    // Find the item to toggle
+    if (!itemID) return;
+    console.log("Toggling item ID:", itemID);
+    const item = selectedTrip.packingList.find(i => i.id === itemID);
+    if (!item) return;
+    console.log("Current item:", item);
+    // Call backend API to update packed status
+    await fetch(`http://localhost:3001/api/travel-plans/item/${itemID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: !item.status })
+    });
+
+    // Update local state
     const updatedTrip = {
       ...selectedTrip,
-      packingList: selectedTrip.packingList.map(item => 
-        item.id === itemId ? { ...item, packed: !item.packed } : item
+      packingList: selectedTrip.packingList.map(item =>
+        item.id === itemID ? { ...item, packed: !item.status } : item
       )
     };
     setSelectedTrip(updatedTrip);
     setTrips(trips.map(t => t.id === selectedTrip.id ? updatedTrip : t));
   };
 
-  const removePackingItem = (itemId) => {
+  const removePackingItem = async (itemId) => {
+    // Call backend API to delete the packing item
+    await fetch(`http://localhost:3001/api/travel-plans/item/${itemId}`, {
+      method: 'DELETE',
+    });
     const updatedTrip = {
       ...selectedTrip,
       packingList: selectedTrip.packingList.filter(item => item.id !== itemId)
@@ -134,29 +224,61 @@ const TravelTracker = () => {
     setTrips(trips.map(t => t.id === selectedTrip.id ? updatedTrip : t));
   };
 
-  const addExpense = () => {
+  const addExpense = async () => {
     if (!newExpense.name.trim() || !newExpense.amount) return;
+    const parsedAmount = parseFloat(newExpense.amount);
+    if (isNaN(parsedAmount) || parsedAmount < 0) return; // Prevent invalid amounts
+
+    const expenseData = {
+      name: newExpense.name.trim(),
+      amount: parsedAmount,
+      date: new Date().toISOString()
+    };
+    // Send expense to backend and get the created expense with its unique id
+    const res = await fetch(`http://localhost:3001/api/travel-plans/${selectedTrip.id}/expense`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expenseData)
+    });
+    const createdExpense = await res.json();
+    console.log("Created Expense:", createdExpense);
+    const expenseDate = createdExpense.date && !isNaN(Date.parse(createdExpense.date))
+      ? createdExpense.date
+      : new Date().toISOString();
+    // Use id from backend
+
+    // Update selectedTrip and trips with the latest expense name from input (not backend response)
     const updatedTrip = {
       ...selectedTrip,
-      expenses: [...selectedTrip.expenses, { 
-        id: generateId(), 
-        name: newExpense.name.trim(), 
-        amount: parseFloat(newExpense.amount), 
-        date: new Date().toISOString().split('T')[0] 
-      }]
+      expenses: [
+        ...selectedTrip.expenses,
+        { 
+          id: createdExpense.expenseId, // Use backend-generated id
+          name: newExpense.name.trim(), // Use latest input value
+          amount: typeof createdExpense.amount === 'number' ? createdExpense.amount : parsedAmount,
+          date: expenseDate
+        }
+      ]
     };
     setSelectedTrip(updatedTrip);
     setTrips(trips.map(t => t.id === selectedTrip.id ? updatedTrip : t));
-    setNewExpense({ name: '', amount: '' });
+    setNewExpense({ id: 0, name: '', amount: '' });
   };
 
-  const removeExpense = (expenseId) => {
+  const removeExpense = async (expenseId) => {
+    console.log("Selected Trip:", selectedTrip);
+    console.log("Removing expense with ID:", expenseId);
+    // Call backend API to delete the expense
+    await fetch(`http://localhost:3001/api/travel-plans/${expenseId}/expense`, {
+      method: 'DELETE',
+    });
     const updatedTrip = {
       ...selectedTrip,
-      expenses: selectedTrip.expenses.filter(expense => expense.id !== expenseId)
+      expenses: selectedTrip.expenses.filter(exp => exp.id !== expenseId)
     };
     setSelectedTrip(updatedTrip);
     setTrips(trips.map(t => t.id === selectedTrip.id ? updatedTrip : t));
+   
   };
 
   return (
@@ -493,7 +615,7 @@ const TravelTracker = () => {
                   onChange={(e) => setNewPackingItem(e.target.value)}
                   placeholder="Add item..."
                   className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                  onKeyPress={(e) => e.key === 'Enter' && addPackingItem()}
+                  onKeyDown={(e) => e.key === 'Enter' && addPackingItem()}
                 />
                 <button
                   onClick={addPackingItem}

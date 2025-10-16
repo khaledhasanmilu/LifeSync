@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import {
   Search, Plus, Calendar, Clock, Flag, CheckSquare, Square, Edit3, Trash2, 
   Filter, SortDesc, Bell, AlertTriangle, Repeat, ChevronDown, ChevronRight,
@@ -35,17 +35,24 @@ const MOOD_SUGGESTIONS = {
 };
 
 // ==================== UTILITY FUNCTIONS ====================
-const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-const isOverdue = (dueDate) => {
-  if (!dueDate) return false;
-  return new Date(dueDate) < new Date();
+const isOverdue = (due_date) => {
+  if (!due_date) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const due = new Date(due_date);
+  due.setHours(0, 0, 0, 0);
+
+  return due < today;
 };
 
-const getDaysUntilDue = (dueDate) => {
-  if (!dueDate) return null;
+
+const getDaysUntilDue = (due_date) => {
+  if (!due_date) return null;
   const today = new Date();
-  const due = new Date(dueDate);
+  const due = new Date(due_date);
   const diffTime = due - today;
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
@@ -65,7 +72,7 @@ const TaskForm = ({ task, onSave, onCancel, isEditing = false }) => {
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    dueDate: task?.dueDate || '',
+    due_date: task?.due_date || '',
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
     recurrence: task?.recurrence || 'none',
@@ -81,7 +88,7 @@ const TaskForm = ({ task, onSave, onCancel, isEditing = false }) => {
 
     const taskData = {
       ...formData,
-      id: task?.id || generateId(),
+      id: task?.id,
       createdAt: task?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -89,17 +96,51 @@ const TaskForm = ({ task, onSave, onCancel, isEditing = false }) => {
     onSave(taskData);
   };
 
-  const addSubtask = () => {
+  const addSubtask = async () => {
     if (newSubtask.trim()) {
+      
+      // If editing an existing task, add subtask to API and use backend id
+      let newSubtaskObj = { id: Date.now().toString(), text: newSubtask, status: false };
+
+      if (task?.id) {
+        try {
+          // Send subtask as object, backend returns id
+          const apiSubtask = { name: newSubtask, status: false, task_id: task.id };
+          const apiRes = await fetch(`http://localhost:3001/api/tasks/subtask`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiSubtask)
+          });
+          const result = await apiRes.json();
+          // Use backend id if provided
+          if (result?.id) {
+            newSubtaskObj.id = result.id.toString();
+          }
+        } catch (e) {
+          // handle error silently
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
-        subtasks: [...prev.subtasks, { id: generateId(), text: newSubtask, completed: false }]
+        subtasks: [...prev.subtasks, newSubtaskObj]
       }));
       setNewSubtask('');
     }
   };
 
-  const removeSubtask = (id) => {
+  const removeSubtask = async (id) => {
+    // If editing an existing task, remove subtask from API
+    if (task?.id) {
+      try {
+        await fetch(`http://localhost:3001/api/tasks/subtask/${id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        // handle error silently
+      }
+    }
     setFormData(prev => ({
       ...prev,
       subtasks: prev.subtasks.filter(st => st.id !== id)
@@ -150,8 +191,8 @@ const TaskForm = ({ task, onSave, onCancel, isEditing = false }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
               <input
                 type="date"
-                value={formData.dueDate}
-                onChange={(e) => setFormData(prev => ({...prev, dueDate: e.target.value}))}
+                value={formData.due_date}
+                onChange={(e) => setFormData(prev => ({...prev, due_date: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
               />
             </div>
@@ -270,14 +311,15 @@ const TaskForm = ({ task, onSave, onCancel, isEditing = false }) => {
 
 const TaskCard = ({ task, onEdit, onDelete, onToggleStatus, onToggleSubtask }) => {
   const [expanded, setExpanded] = useState(false);
-  const priority = PRIORITY_CONFIG[task.priority];
-  const status = STATUS_CONFIG[task.status];
-  const StatusIcon = status.icon;
-  const PriorityIcon = priority.icon;
-  
-  const overdue = isOverdue(task.dueDate);
-  const daysUntil = getDaysUntilDue(task.dueDate);
-  
+  const priority = PRIORITY_CONFIG[task.priority];//PRIORITY_CONFIG[task.priority]
+
+  const status = STATUS_CONFIG[task.status];//STATUS_CONFIG[task.status]
+  const StatusIcon = STATUS_CONFIG[task.status].icon;
+  const PriorityIcon = PRIORITY_CONFIG[task.priority].icon;
+
+  const overdue = isOverdue(task.due_date);
+  const daysUntil = getDaysUntilDue(task.due_date);
+
   const completedSubtasks = task.subtasks?.filter(st => st.completed).length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
 
@@ -324,10 +366,10 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus, onToggleSubtask }) =
 
           {/* Meta Info */}
           <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-            {task.dueDate && (
+            {task.due_date && (
               <div className={`flex items-center gap-1 ${overdue && task.status !== 'completed' ? 'text-red-600' : ''}`}>
                 <Calendar className="w-4 h-4" />
-                <span>{formatDate(task.dueDate)}</span>
+                <span>{formatDate(task.due_date)}</span>
                 {overdue && task.status !== 'completed' && (
                   <span className="text-red-600 font-medium">Overdue</span>
                 )}
@@ -381,13 +423,13 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus, onToggleSubtask }) =
                         onClick={() => onToggleSubtask(task.id, subtask.id)}
                         className="text-gray-400 hover:text-green-600"
                       >
-                        {subtask.completed ? (
+                        {subtask.status ? (
                           <CheckSquare className="w-4 h-4 text-green-600" />
                         ) : (
                           <Square className="w-4 h-4" />
                         )}
                       </button>
-                      <span className={`text-sm ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-700'}`}>
+                      <span className={`text-sm ${subtask.status ? 'line-through text-gray-500' : 'text-gray-700'}`}>
                         {subtask.text}
                       </span>
                     </div>
@@ -412,10 +454,12 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus, onToggleSubtask }) =
 
 const Dashboard = ({ tasks, onViewChange }) => {
   const today = new Date().toDateString();
+
   const todayTasks = tasks.filter(task => 
-    task.dueDate && new Date(task.dueDate).toDateString() === today && task.status !== 'completed'
+    task.due_date && new Date(task.due_date).toDateString() === today && task.status !== 'completed'
   );
-  const overdueTasks = tasks.filter(task => isOverdue(task.dueDate) && task.status !== 'completed');
+  const overdueTasks = tasks.filter(task => isOverdue(task.due_date) && task.status !== 'completed');
+  
   const completedToday = tasks.filter(task => 
     task.status === 'completed' && 
     new Date(task.updatedAt).toDateString() === today
@@ -538,7 +582,7 @@ const Dashboard = ({ tasks, onViewChange }) => {
                   <AlertTriangle className="w-4 h-4 text-red-600" />
                   <div className="flex-1">
                     <p className="text-sm text-gray-700">{task.title}</p>
-                    <p className="text-xs text-red-600">Due: {formatDate(task.dueDate)}</p>
+                    <p className="text-xs text-red-600">Due: {formatDate(task.due_date)}</p>
                   </div>
                 </div>
               ))}
@@ -580,10 +624,7 @@ const Dashboard = ({ tasks, onViewChange }) => {
 // ==================== MAIN COMPONENT ====================
 const LifeSyncToDo = () => {
   const [currentView, setCurrentView] = useState('dashboard');
-  const [tasks, setTasks] = useState(() => {
-    const saved = sessionStorage.getItem('lifesync-tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -591,13 +632,70 @@ const LifeSyncToDo = () => {
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
-    sortBy: 'dueDate'
+    sortBy: 'due_date'
   });
-
+  const fetchUserID = async () => {
+    const res = await fetch("/api/usr");
+    const data = await res.json();
+    return data.userId; // return it for immediate use
+  };
+   // Placeholder user ID
   // Save tasks to sessionStorage whenever tasks change
+  
+  // Load tasks from API on mount
   useEffect(() => {
-    sessionStorage.setItem('lifesync-tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    async function fetchData() {
+      const userId = await fetchUserID();
+      try {
+        const res = await fetch(`http://localhost:3001/api/tasks/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await res.json();
+        // Ensure tasks is always an array
+        const apiTasks = Array.isArray(data.tasks) ? data.tasks : [];
+        // Map API fields to frontend fields
+        const mappedTasks = apiTasks.map(task => ({
+          id: task.id?.toString(),
+          title: task.title || '',
+          description: task.description || '',
+          due_date: task.due_date || '',
+          priority: task.priority || 'medium',
+          status: task.status || 'pending',
+          recurrence: task.recurrence || 'none',
+          notes: task.notes || '',
+          createdAt: task.created_at || new Date().toISOString(),
+          updatedAt: task.updated_at || new Date().toISOString(),
+          subtasks: Array.isArray(task.subtasks)
+            ? task.subtasks.map(st => ({
+                id: st.id?.toString(),
+                text: st.name || '',
+                status: !!st.status
+              }))
+            : []
+        }));
+        setTasks(mappedTasks);
+        //console.log('Tasks loaded from API:', mappedTasks);
+      } catch (error) {
+        // handle error silently
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  // Optionally, you can POST/PUT tasks to the API when tasks change
+  // useEffect(() => {
+  //   fetch(`http://localhost:3001/api/tasks/${userId}`, {
+  //     method: 'PUT',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify(tasks)
+  //   });
+  // }, [tasks]);
 
   // Filter and sort tasks
   useEffect(() => {
@@ -617,11 +715,11 @@ const LifeSyncToDo = () => {
     // Sort
     filtered.sort((a, b) => {
       switch (filters.sortBy) {
-        case 'dueDate':
-          if (!a.dueDate && !b.dueDate) return 0;
-          if (!a.dueDate) return 1;
-          if (!b.dueDate) return -1;
-          return new Date(a.dueDate) - new Date(b.dueDate);
+        case 'due_date':
+          if (!a.due_date && !b.due_date) return 0;
+          if (!a.due_date) return 1;
+          if (!b.due_date) return -1;
+          return new Date(a.due_date) - new Date(b.due_date);
         case 'priority':
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           return priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -636,13 +734,75 @@ const LifeSyncToDo = () => {
   }, [tasks, searchQuery, filters]);
 
   // Task CRUD operations
-  const handleSaveTask = (taskData) => {
+  const handleSaveTask = async (taskData) => {
+    const userId = await fetchUserID();
+
+    if (!userId){
+      console.error("User ID not found.");
+      return;
+    }
+
+    console.log("Saving task for user:", userId, taskData);
+
+    const due_date = new Date(taskData.due_date).toISOString().split('T')[0];
+    // Prepare API task object
+    const apiTask = {
+      id: taskData.id,
+      user_id: userId,
+      title: taskData.title,
+      description: taskData.description,
+      due_date: due_date,
+      priority: taskData.priority,
+      status: taskData.status,
+      recurrence: taskData.recurrence,
+      notes: taskData.notes
+    };
+
+    // Prepare subtasks for API
+    // const apiSubtasks = Array.isArray(taskData.subtasks)
+    //   ? taskData.subtasks.map(st => ({
+    //       id: st.id,
+    //       name: st.text,
+    //       status: !!st.status,
+    //       task_id: apiTask.id
+    //     }))
+    //   : [];
+
     if (editingTask) {
+      // Update task and subtasks via API
+      try {
+        console.log("Updating task via API:", apiTask.id);
+        await fetch(`http://localhost:3001/api/tasks/${apiTask.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiTask)
+        });
+        // await fetch(`http://localhost:3001/api/subtasks/${userId}/${apiTask.id}`, {
+        //   method: 'PUT',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ subtasks: apiSubtasks })
+        // });
+      } catch (e) {}
       setTasks(prev => prev.map(task => 
-        task.id === taskData.id ? taskData : task
+        task.id === apiTask.id ? { ...taskData, updatedAt: apiTask.updated_at } : task
       ));
     } else {
-      setTasks(prev => [...prev, taskData]);
+      // Create task and subtasks via API
+      try {
+        await fetch(`http://localhost:3001/api/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiTask)
+        });
+        // if (apiSubtasks.length > 0) {
+        //   await fetch(`http://localhost:3001/api/subtasks/${userId}/${apiTask.id}`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ subtasks: apiSubtasks })
+        //   });
+        // }
+      } catch (e) {}
+      setTasks(prev => [...prev, { ...taskData, updatedAt: apiTask.updated_at }]);
     }
     setShowTaskForm(false);
     setEditingTask(null);
@@ -653,20 +813,47 @@ const LifeSyncToDo = () => {
     setShowTaskForm(true);
   };
 
-  const handleDeleteTask = (taskId) => {
+  const handleDeleteTask = async (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
+      const userId = await fetchUserID();
+      try {
+        await fetch(`http://localhost:3001/api/tasks/${taskId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        // handle error silently
+      }
       setTasks(prev => prev.filter(task => task.id !== taskId));
     }
   };
 
-  const handleToggleStatus = (taskId) => {
+  const handleToggleStatus = async (taskId) => {
     setTasks(prev => prev.map(task => {
       if (task.id === taskId) {
         let newStatus;
         if (task.status === 'pending') newStatus = 'in-progress';
         else if (task.status === 'in-progress') newStatus = 'completed';
         else newStatus = 'pending';
-        
+
+        // Update status in API
+        (async () => {
+          
+          try {
+            await fetch(`http://localhost:3001/api/tasks/${taskId}/complete`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...task,
+                status: newStatus,
+                updated_at: new Date().toISOString()
+              })
+            });
+          } catch (e) {
+            // handle error silently
+          }
+        })();
+
         return {
           ...task,
           status: newStatus,
@@ -677,14 +864,28 @@ const LifeSyncToDo = () => {
     }));
   };
 
-  const handleToggleSubtask = (taskId, subtaskId) => {
+  const handleToggleSubtask = async (taskId, subtaskId) => {
     setTasks(prev => prev.map(task => {
       if (task.id === taskId) {
         const updatedSubtasks = task.subtasks.map(subtask =>
           subtask.id === subtaskId 
-            ? { ...subtask, completed: !subtask.completed }
+            ? { ...subtask, status: !subtask.status }
             : subtask
         );
+        // Call API to update subtask status
+        (async () => {
+          try {
+            await fetch(`http://localhost:3001/api/tasks/subtask/${subtaskId}/complete`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                status: !task.subtasks.find(st => st.id === subtaskId)?.status
+              })
+            });
+          } catch (e) {
+            // handle error silently
+          }
+        })();
         return { ...task, subtasks: updatedSubtasks };
       }
       return task;
@@ -853,7 +1054,7 @@ const LifeSyncToDo = () => {
                     </span>
                   )}
                   <button
-                    onClick={() => setFilters({status: '', priority: '', sortBy: 'dueDate'})}
+                    onClick={() => setFilters({status: '', priority: '', sortBy: 'due_date'})}
                     className="text-xs text-purple-600 hover:text-purple-700 font-medium"
                   >
                     Clear all

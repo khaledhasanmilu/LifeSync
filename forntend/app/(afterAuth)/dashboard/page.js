@@ -3,7 +3,8 @@ import React, { useState,useEffect } from 'react';
 import {
 
   DollarSign, CheckSquare, Plus, Clock, Target, Coffee, Smile, Meh, Frown,
-  Heart, TrendingUp, TrendingDown, Sparkles, Sun, Moon
+  Heart, TrendingUp, TrendingDown, Sparkles, Sun, Moon,
+  User,Circle
 } from 'lucide-react';
 
 export default function LifeSyncDashboard() {
@@ -11,20 +12,81 @@ export default function LifeSyncDashboard() {
   const [username, setUsername] = useState('Guest');
   const [todayMood, setTodayMood] = useState('happy');
   const [completedTasks, setCompletedTasks] = useState([false, false, false, true]);
-
-  const todayTasks = [
+ 
+  const [income, setIncome] = useState(0);
+  const [expenses, setExpenses] = useState(0);
+  const [savings, setSavings] = useState(0);
+  const savingsGoal = 75; // in percentage
+  const [tasks, setTasks] = useState([
+    // Example tasks
     { id: 1, title: 'Review quarterly budget', priority: 'high' },
     { id: 2, title: 'Complete React tutorial', priority: 'medium' },
     { id: 3, title: 'Plan weekend trip', priority: 'low' },
     { id: 4, title: 'Call dentist for appointment', priority: 'medium' },
-  ];
+
+  ]);
+  
+
+  const today = new Date().toDateString();
+
+  const todayTasks = tasks.filter(task => 
+    task.due_date && new Date(task.due_date).toDateString() === today && task.status !== 'completed'
+  );
+
+
+
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // 🔹 Get logged in user
+      const userRes = await fetch('/api/usr');
+      const userData = await userRes.json();
+      const userId = userData.userId;
+
+      // 🔸 Get income-expense
+      const financeRes = await fetch(`http://localhost:3001/api/income-expense/${userId}`);
+      const financeData = await financeRes.json();
+      setIncome(financeData.total_income ? parseInt(financeData.total_income, 10) : 0);
+      setExpenses(financeData.total_expense ? parseInt(financeData.total_expense, 10) : 0);
+      setSavings(financeData.saving ? parseInt(financeData.saving, 10) : 0);
+
+      // 📝 Get tasks
+      const taskRes = await fetch(`http://localhost:3001/api/tasks/${userId}`);
+      const taskData = await taskRes.json();
+
+      console.log("Raw tasks data:", taskData.tasks);
+
+      const simplifiedTasks = taskData.tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        priority: task.priority,
+        due_date: task.due_date,
+        status: task.status,
+        
+      }));
+
+      setTasks(Array.from(simplifiedTasks));
+      setTasks(simplifiedTasks);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
 
  
 
   useEffect(() => {
     fetch("/api/usr")
       .then(res => res.json())
-      .then(data => setUsername(data.username));
+      .then(data => {
+        setUsername(data.username);
+        
+      });
+    
   }, []);
 
   const timeCategories = [
@@ -38,10 +100,40 @@ export default function LifeSyncDashboard() {
     "Success is not final, failure is not fatal: it is the courage to continue that counts.",
   ];
 
-  const toggleTaskCompletion = (index) => {
-    const newCompletedTasks = [...completedTasks];
-    newCompletedTasks[index] = !newCompletedTasks[index];
-    setCompletedTasks(newCompletedTasks);
+  const handleToggleStatus = async (taskId) => {
+    setTasks(prev =>
+      prev.map(task => {
+        if (task.id === taskId) {
+          let newStatus;
+          if (task.status === 'pending' || task.status === 'in-progress') newStatus = 'completed';
+          
+
+          // Update status in API
+          (async () => {
+            try {
+              await fetch(`http://localhost:3001/api/tasks/${taskId}/complete`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...task,
+                  status: newStatus,
+                  updated_at: new Date().toISOString()
+                })
+              });
+            } catch (e) {
+              // handle error silently
+            }
+          })();
+
+          return {
+            ...task,
+            status: newStatus,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return task;
+      })
+    );
   };
 
   const getMoodIcon = (mood) => {
@@ -102,7 +194,7 @@ export default function LifeSyncDashboard() {
                 <div className="mb-6 text-center">
                   <p className="text-sm text-gray-300 mb-2">Total Balance</p>
                   <div className="flex items-center justify-center space-x-2">
-                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$12,450</span>
+                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">${savings}</span>
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Last updated: 2 hours ago</p>
@@ -116,7 +208,7 @@ export default function LifeSyncDashboard() {
                         <TrendingDown className="w-4 h-4 text-red-400" />
                       </div>
                       <p className="text-xs text-gray-300">Monthly Expense</p>
-                      <p className="text-lg font-bold text-red-400">$3,280</p>
+                      <p className="text-lg font-bold text-red-400">${expenses}</p>
                     </div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-xl hover:bg-white/15 transition-all duration-300">
@@ -125,7 +217,7 @@ export default function LifeSyncDashboard() {
                         <Target className="w-4 h-4 text-blue-400" />
                       </div>
                       <p className="text-xs text-gray-300">Savings Goal</p>
-                      <p className="text-lg font-bold text-blue-400">75%</p>
+                      <p className="text-lg font-bold text-blue-400">{savingsGoal}%</p>
                     </div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-xl hover:bg-white/15 transition-all duration-300">
@@ -134,7 +226,7 @@ export default function LifeSyncDashboard() {
                         <TrendingUp className="w-4 h-4 text-purple-400" />
                       </div>
                       <p className="text-xs text-gray-300">Income</p>
-                      <p className="text-lg font-bold text-purple-400">$8,500</p>
+                      <p className="text-lg font-bold text-purple-400">{income}</p>
                     </div>
                   </div>
                 </div>
@@ -160,13 +252,14 @@ export default function LifeSyncDashboard() {
                     }`}
                   >
                     <button
-                      onClick={() => toggleTaskCompletion(index)}
+                      onClick={() => handleToggleStatus(task.id)}
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${completedTasks[index]
                         ? 'bg-green-500 border-green-500'
                         : 'border-gray-300 hover:border-orange-400'
                       }`}
                     >
                       {completedTasks[index] && <CheckSquare className="w-3 h-3 text-white" />}
+                      
                     </button>
                     <span className={`${completedTasks[index] ? 'text-green-700 line-through' : 'text-gray-700'} flex-1`}>
                       {task.title}

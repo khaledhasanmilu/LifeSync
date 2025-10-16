@@ -86,6 +86,7 @@ const loginUser = async (req, res) => {
       // Set cookies for user id and name
       res.cookie('userId', user.id, { httpOnly: true });
       res.cookie('userName', user.name, { httpOnly: true });
+      res.cookie('userEmail', user.email, { httpOnly: true });
 
       // Don't send password in response
       const { password: userPassword, ...userWithoutPassword } = user;
@@ -100,4 +101,11 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, signupUser, loginUser };
+const logoutUser = (req, res) => {
+  res.clearCookie('userId');
+  res.clearCookie('userName');
+  res.clearCookie('userEmail');
+  res.json({ message: 'Logout successful' });
+};
+
+module.exports = { getUsers, signupUser, loginUser, logoutUser };

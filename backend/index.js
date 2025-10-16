@@ -7,6 +7,7 @@ const incomeExpenseRoutes = require('./routes/incomeExpense');
 
 const learningRoutes = require('./routes/learningRoutes');
 const travelPlanRoutes = require('./routes/travelPlanRoutes');
+const taskRoute = require('./routes/taskRoute');
 const app = express();
 
 // Middleware
@@ -29,6 +30,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/income-expense', incomeExpenseRoutes);
 app.use('/api/learnings', learningRoutes);
 app.use('/api/travel-plans', travelPlanRoutes);
+app.use('/api/tasks', taskRoute);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

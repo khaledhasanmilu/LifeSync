@@ -11,6 +11,19 @@ export default function Layout({ children }) {
   const pathname = usePathname();
   const [activePage, setActivePage] = useState('Dashboard');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [username, setUsername] = useState('Guest');
+  const [userEmail, setUserEmail] = useState('example@gmail.com');
+
+    useEffect(() => {
+      fetch("/api/usr")
+        .then(res => res.json())
+        .then(data => {
+          setUsername(data.username);
+          setUserEmail(data.userEmail);
+        });
+      
+    }, []);
+
 
   useEffect(() => {
     if (pathname.includes('dashboard')) setActivePage('Dashboard');
@@ -18,7 +31,6 @@ export default function Layout({ children }) {
     else if (pathname.includes('todo')) setActivePage('Todo');
     else if (pathname.includes('learning')) setActivePage('Learning');
     else if (pathname.includes('travel')) setActivePage('Travel');
-    else if (pathname.includes('emergency')) setActivePage('Emergency');
     else if (pathname.includes('quickdock')) setActivePage('QuickDock');
   }, [pathname]);
 
@@ -28,13 +40,25 @@ export default function Layout({ children }) {
     { id: 'Todo', label: 'To-Do', icon: <CheckSquare className="w-5 h-5" />, path: '/todo' },
     { id: 'Learning', label: 'Learning Queue', icon: <BookOpen className="w-5 h-5" />, path: '/learning' },
     { id: 'Travel', label: 'Travel Tracker', icon: <MapPin className="w-5 h-5" />, path: '/travel' },
-    { id: 'Emergency', label: 'Emergency Alert', icon: <AlertTriangle className="w-5 h-5" />, path: '/emergency' },
     { id: 'QuickDock', label: 'QuickDock', icon: <Zap className="w-5 h-5" />, path: '/quickdock' },
   ];
 
   const handleNavigate = (path, id) => {
     setActivePage(id);
     router.push(path);
+  };
+
+  const handleLogout = () => {
+    fetch('http://localhost:3001/api/users/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message);
+    });
+    // Redirect to login page
+    router.push('/login');
   };
 
   return (
@@ -82,7 +106,7 @@ export default function Layout({ children }) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-gray-100/50">
+        {/* <div className="p-4 border-t border-gray-100/50">
           <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
@@ -94,7 +118,7 @@ export default function Layout({ children }) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Main Content */}
@@ -141,8 +165,8 @@ export default function Layout({ children }) {
                 {showProfileDropdown && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-800">John Doe</p>
-                      <p className="text-xs text-gray-500">john@example.com</p>
+                      <p className="text-sm font-semibold text-gray-800">{username}</p>
+                      <p className="text-xs text-gray-500">{userEmail}</p>
                     </div>
                     <button className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50 flex items-center space-x-3 transition-all group">
                       <Settings className="w-4 h-4 text-gray-500 group-hover:text-purple-600 group-hover:rotate-90 transition-all" />
@@ -150,7 +174,7 @@ export default function Layout({ children }) {
                     </button>
                     <button className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-red-50 flex items-center space-x-3 transition-all group">
                       <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-600 transition-colors" />
-                      <span className="text-sm">Logout</span>
+                      <span className="text-sm" onClick={handleLogout}>Logout</span>
                     </button>
                   </div>
                 )}

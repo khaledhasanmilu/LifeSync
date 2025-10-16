@@ -1,0 +1,101 @@
+Here are suggested APIs for trip expenses and packing items:
+
+**Schema**
+
+- **Trip**
+    - `id`: integer
+    - `name`: string
+    - `startDate`: string (YYYY-MM-DD)
+    - `endDate`: string (YYYY-MM-DD)
+
+- **Expense**
+    - `id`: integer
+    - `tripId`: integer
+    - `name`: string
+    - `amount`: number
+    - `date`: string (YYYY-MM-DD)
+
+- **PackingItem**
+    - `id`: integer
+    - `tripId`: integer
+    - `name`: string
+    - `packed`: boolean
+
+**1. Trip Expenses API**
+
+- **Add Expense**
+    - `POST /api/travel-plans/:tripId/expenses`
+    - **Body:**
+        ```json
+        {
+            "name": "Lunch",
+            "amount": 15.5,
+            "date": "2024-06-10"
+        }
+        ```
+    - **Response:**
+        ```json
+        {
+            "id": 1,
+            "name": "Lunch",
+            "amount": 15.5,
+            "date": "2024-06-10"
+        }
+        ```
+
+- **Delete Expense**
+    - `DELETE /api/travel-plans/:tripId/expenses/:expenseId`
+
+- **Get Expenses**
+    - `GET /api/travel-plans/:tripId/expenses`
+    - **Response:**
+        ```json
+        [
+            { "id": 1, "name": "Lunch", "amount": 15.5, "date": "2024-06-10" },
+            { "id": 2, "name": "Taxi", "amount": 30, "date": "2024-06-11" }
+        ]
+        ```
+
+**2. Trip Packing Items API**
+
+- **Add Packing Item**
+    - `POST /api/travel-plans/:tripId/packing-list`
+    - **Body:**
+        ```json
+        {
+            "name": "Sunglasses",
+            "packed": false
+        }
+        ```
+    - **Response:**
+        ```json
+        {
+            "id": 1,
+            "name": "Sunglasses",
+            "packed": false
+        }
+        ```
+
+- **Toggle Packed Status**
+    - `PUT /api/travel-plans/:tripId/packing-list/:itemId`
+    - **Body:**
+        ```json
+        {
+            "packed": true
+        }
+        ```
+
+- **Delete Packing Item**
+    - `DELETE /api/travel-plans/:tripId/packing-list/:itemId`
+
+- **Get Packing List**
+    - `GET /api/travel-plans/:tripId/packing-list`
+    - **Response:**
+        ```json
+        [
+            { "id": 1, "name": "Sunglasses", "packed": false },
+            { "id": 2, "name": "Passport", "packed": true }
+        ]
+        ```
+
+Let me know if you need backend code examples for these endpoints.

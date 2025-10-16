@@ -633,7 +633,7 @@ useEffect(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-600 text-sm font-medium">Total Income</p>
-                  <p className="text-2xl font-bold text-green-800">${totalIncome.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-green-800">৳{totalIncome.toLocaleString()}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-600" />
               </div>
@@ -643,7 +643,7 @@ useEffect(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-red-600 text-sm font-medium">Total Expenses</p>
-                  <p className="text-2xl font-bold text-red-800">${totalExpenses.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-red-800">৳{totalExpenses.toLocaleString()}</p>
                 </div>
                 <TrendingDown className="w-8 h-8 text-red-600" />
               </div>
@@ -653,7 +653,7 @@ useEffect(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`${totalSavings >= 0 ? 'text-purple-600' : 'text-orange-600'} text-sm font-medium`}>Net Savings</p>
-                  <p className="text-2xl font-bold text-gray-800">${totalSavings.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-800">৳{totalSavings.toLocaleString()}</p>
                 </div>
                 <Target className={`w-8 h-8 ${totalSavings >= 0 ? 'text-purple-600' : 'text-orange-600'}`} />
               </div>
@@ -691,7 +691,7 @@ useEffect(() => {
                             </div>
                             <div>
                               <span className="text-gray-800 font-medium">{budget.category}</span>
-                              <p className="text-gray-500 text-sm">${budget.spent} of ${budget.limit}</p>
+                              <p className="text-gray-500 text-sm">৳{budget.spent} of ৳{budget.limit}</p>
                             </div>
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -773,8 +773,8 @@ useEffect(() => {
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center">
-                          <div className="bg-white p-2 rounded-lg mr-3 shadow-sm">
-                            <Icon className="h-4 w-4 text-gray-600" />
+                          <div className="bg-white p-2 rounded-lg mr-3 shadow-sm"> 
+                            {<Icon className="h-4 w-4 text-gray-600" /> }
                           </div>
                           <div>
                             <p className="text-gray-800 font-medium text-sm">{transaction.description}</p>
@@ -783,7 +783,7 @@ useEffect(() => {
                         </div>
                         <div className="text-right">
                           <span className={`font-bold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                            {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                            {transaction.type === 'income' ? '+' : '-'}৳{transaction.amount}
                           </span>
                         </div>
                       </div>

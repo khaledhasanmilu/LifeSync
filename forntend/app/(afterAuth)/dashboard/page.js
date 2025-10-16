@@ -11,8 +11,8 @@ export default function LifeSyncDashboard() {
   // Try different casing and check for cookie existence
   const [username, setUsername] = useState('Guest');
   const [todayMood, setTodayMood] = useState('happy');
-  const [completedTasks, setCompletedTasks] = useState([false, false, false, true]);
- 
+  const [completedTasks, setCompletedTasks] = useState([false, false, false, false]);
+
   const [income, setIncome] = useState(0);
   const [expenses, setExpenses] = useState(0);
   const [savings, setSavings] = useState(0);
@@ -259,7 +259,6 @@ export default function LifeSyncDashboard() {
                       }`}
                     >
                       {completedTasks[index] && <CheckSquare className="w-3 h-3 text-white" />}
-                      
                     </button>
                     <span className={`${completedTasks[index] ? 'text-green-700 line-through' : 'text-gray-700'} flex-1`}>
                       {task.title}

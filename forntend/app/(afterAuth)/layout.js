@@ -168,10 +168,10 @@ export default function Layout({ children }) {
                       <p className="text-sm font-semibold text-gray-800">{username}</p>
                       <p className="text-xs text-gray-500">{userEmail}</p>
                     </div>
-                    <button className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50 flex items-center space-x-3 transition-all group">
+                    {/* <button className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50 flex items-center space-x-3 transition-all group">
                       <Settings className="w-4 h-4 text-gray-500 group-hover:text-purple-600 group-hover:rotate-90 transition-all" />
                       <span className="text-sm">Settings</span>
-                    </button>
+                    </button> */}
                     <button className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-red-50 flex items-center space-x-3 transition-all group">
                       <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-600 transition-colors" />
                       <span className="text-sm" onClick={handleLogout}>Logout</span>

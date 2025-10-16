@@ -51,7 +51,7 @@ const TravelTracker = () => {
     budget: '',
     notes: ''
   });
-  const [newPackingItem, setNewPackingItem] = useState({id: 0, name: '' , packed: false });
+  const [newPackingItem, setNewPackingItem] = useState();
   const [newExpense, setNewExpense] = useState({id: 0, name: '', amount: '' });
   const [searchQuery, setSearchQuery] = useState('');
 

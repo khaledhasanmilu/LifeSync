@@ -149,12 +149,12 @@ const QuickDoc = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          {/* <div>
+          <div>
             <h1 className="text-3xl font-bold text-gray-800">QuickDoc</h1>
             <p className="text-gray-600">
               {currentView === 'home' ? 'Access your favorite platforms instantly' : 'Browse available resources'}
             </p>
-          </div> */}
+          </div>
         </div>
 
         {/* View Toggle */}

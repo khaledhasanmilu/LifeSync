@@ -231,10 +231,10 @@ const LearningQueue = () => {
     <div className="flex-1 flex flex-col overflow-auto p-6 bg-gray-50">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        {/* <div>
+        <div>
           <h1 className="text-3xl font-bold text-gray-800">Learning Queue</h1>
           <p className="text-gray-600">Track your learning progress and stay organized</p>
-        </div> */}
+        </div>
 
         <button
           onClick={() => setShowForm(true)}

@@ -4,13 +4,18 @@
 CREATE DATABASE IF NOT EXISTS LifeSync;
 USE LifeSync;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Drop tables if they exist (to avoid conflicts)
 DROP TABLE IF EXISTS travel_plans;
 DROP TABLE IF EXISTS emergency_contacts;
 DROP TABLE IF EXISTS learning;
 DROP TABLE IF EXISTS finance;
 DROP TABLE IF EXISTS todos;
+DROP TABLE IF EXISTS budget;
 DROP TABLE IF EXISTS user;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Users table (create this first as it's referenced by other tables)
 CREATE TABLE user (

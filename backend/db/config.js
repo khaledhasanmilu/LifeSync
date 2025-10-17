@@ -4,7 +4,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'LifeSync'
+  database: process.env.NODE_ENV === 'test' ? 'LifeSync_test' : 'LifeSync'
 });
 
 db.connect((err) => {

@@ -57,6 +57,7 @@ WHERE b.user_id = ?;
 
 // Create a new budget entry
 const createBudget = (req, res) => {
+  console.log("hit budget creation"); // Debugging line
   const { user_id, amount, area, date } = req.body;
     if (!user_id || !amount || !area) {
         return res.status(400).json({ error: 'User ID, amount, and area are required' });

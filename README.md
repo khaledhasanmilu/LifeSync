@@ -11,6 +11,62 @@ LifeSync is a personal dashboard designed to help you organize your daily life, 
 -   **Travel Planner:** Plan your trips and adventures.
 -   **Learning Hub:** Organize your learning resources and track your progress.
 
+## Screenshots
+
+**Homepage**
+
+![Homepage](./forntend/public/screenshots/homepage1.png)
+![Homepage](./forntend/public/screenshots/Homepage2.png)
+![Homepage](./forntend/public/screenshots/Homepage3.png)
+
+**Authentication**
+
+![Signup](./forntend/public/screenshots/Signup.png)
+![Signin](./forntend/public/screenshots/Singin.png)
+
+**Dashboard**
+
+![Dashboard](./forntend/public/screenshots/Dashboard.png)
+
+**To-Do**
+
+![To-Do Dashboard](./forntend/public/screenshots/to%20do%20dashboard.png)
+![Create Task](./forntend/public/screenshots/to%20do%20create%20task.png)
+![Task List](./forntend/public/screenshots/to%20do%20tasklist.png)
+
+**Finance Tracker**
+
+![Finance Tracker](./forntend/public/screenshots/finance%20Tracker1.png)
+![Finance Tracker Budget](./forntend/public/screenshots/Finance%20Tracker%20budget.png)
+![Create Budget](./forntend/public/screenshots/FInance%20tracker%20create%20budget.png)
+![Add Income/Expense](./forntend/public/screenshots/finance%20tracker%20add%20income%20expanse.png)
+![Income/Expense Category](./forntend/public/screenshots/incom_expence%20category.png)
+![Add Money](./forntend/public/screenshots/money%20add%20in%20finance.png)
+![Money Description](./forntend/public/screenshots/money%20description.png)
+
+**Travel Tracker**
+
+![Travel Tracker](./forntend/public/screenshots/travel%20tracker.png)
+![Add New Trip](./forntend/public/screenshots/Travel%20tracker%20new%20trip%20add.png)
+![Keyword Search](./forntend/public/screenshots/travel%20tracker%20keyword%20search.png)
+![Budget and Item](./forntend/public/screenshots/travel%20traker%20budget%20and%20item.png)
+
+**Learning Hub**
+
+![Learning Queue](./forntend/public/screenshots/Learning%20queue.png)
+![Add Learning Item](./forntend/public/screenshots/add%20learning%20item.png)
+
+**Quick Dock**
+
+![Quickdoc Dashboard](./forntend/public/screenshots/Quickdoc%20dashboard.png)
+![Newspaper](./forntend/public/screenshots/Quickdoc%20news%20papet.png)
+![Prothom Alo](./forntend/public/screenshots/quickdoc%20prothom%20alo.png)
+
+**Logout**
+
+![Logout](./forntend/public/screenshots/logout.png)
+
+
 ## Technologies Used
 
 ### Frontend

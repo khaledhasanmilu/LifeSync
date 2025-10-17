@@ -42,7 +42,7 @@ describe('FinanceTracker Component', () => {
     render(<FinanceTracker />);
     
     await waitFor(() => {
-      expect(screen.getByText('Financial Dashboard')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Dashboard/i })).toBeInTheDocument();
     });
   });
 });

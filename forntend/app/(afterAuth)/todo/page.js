@@ -475,10 +475,7 @@ const Dashboard = ({ tasks, onViewChange }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h2>
-        <p className="text-gray-600">Your productivity overview and quick actions</p>
-      </div>
+    
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -910,12 +907,7 @@ const LifeSyncToDo = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          {/* <div>
-            <h1 className="text-3xl font-bold text-gray-800">ToDo</h1>
-            <p className="text-gray-600">
-              {currentView === 'dashboard' ? 'Organize your life, one task at a time' : 'Manage your tasks'}
-            </p>
-          </div> */}
+         
         </div>
 
         {/* View Toggle */}

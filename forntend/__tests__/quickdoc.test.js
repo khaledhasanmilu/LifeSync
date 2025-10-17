@@ -7,6 +7,6 @@ describe('QuickDoc Component', () => {
   test('renders quickdoc dashboard', () => {
     render(<QuickDoc />);
     
-    expect(screen.getByText('QuickDoc')).toBeInTheDocument();
+    expect(screen.getByText('News Hub')).toBeInTheDocument();
   });
 });

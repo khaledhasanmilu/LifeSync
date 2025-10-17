@@ -48,7 +48,7 @@ describe('LearningQueue Component', () => {
     render(<LearningQueue />);
     
     await waitFor(() => {
-      expect(screen.getByText('Learning Queue')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Add New Learning Item/i })).toBeInTheDocument();
     });
   });
 });

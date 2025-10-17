@@ -35,7 +35,7 @@ describe('LifeSyncToDo Component', () => {
     render(<LifeSyncToDo />);
     
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Dashboard/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Dashboard/i })).toBeInTheDocument();
     });
   });
 });

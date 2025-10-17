@@ -197,13 +197,13 @@ const LearningQueue = () => {
   if (!isClient) {
     return (
       <div className="flex-1 flex flex-col overflow-auto p-6 bg-gray-50">
-        <div className="flex items-center justify-between mb-6">
+        {/* <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Learning Queue</h1>
             <p className="text-gray-600">Track your learning progress and stay organized</p>
           </div>
           <div className="w-48 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2 mb-6">
           <span className="text-sm font-medium text-gray-700 mr-2">Filter:</span>
           <div className="w-16 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
@@ -231,11 +231,7 @@ const LearningQueue = () => {
     <div className="flex-1 flex flex-col overflow-auto p-6 bg-gray-50">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Learning Queue</h1>
-          <p className="text-gray-600">Track your learning progress and stay organized</p>
-        </div>
-
+       
         <button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"

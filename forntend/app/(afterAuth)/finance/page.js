@@ -338,12 +338,7 @@ useEffect(() => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
           )}
-          {/* <div>
-            <h1 className="text-3xl font-bold text-gray-800">Finance</h1>
-            <p className="text-gray-600">
-              {currentView === 'dashboard' ? 'Track your money, achieve your goals' : 'Manage your finances'}
-            </p>
-          </div> */}
+         
         </div>
 
         {/* View Toggle */}
@@ -621,11 +616,7 @@ useEffect(() => {
       {/* Dashboard View */}
       {currentView === 'dashboard' && (
         <div className="space-y-6">
-          {/* Header */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Financial Dashboard</h2>
-            <p className="text-gray-600">Your money overview and insights</p>
-          </div>
+      
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

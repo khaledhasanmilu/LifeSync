@@ -35,7 +35,7 @@ describe('TravelTracker Component', () => {
     render(<TravelTracker />);
     
     await waitFor(() => {
-      expect(screen.getByText('Travel Tracker')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /New Trip/i })).toBeInTheDocument();
     });
   });
 });

@@ -1,6 +1,6 @@
 # LifeSync
 
-LifeSync is a personal dashboard to organize your daily tasks, finances, and travel.
+LifeSync is a personal dashboard designed to help you organize your daily life, including tasks, finances, and travel plans. It provides a central hub to manage various aspects of your life, enhancing productivity and organization.
 
 ## Features
 
@@ -9,7 +9,7 @@ LifeSync is a personal dashboard to organize your daily tasks, finances, and tra
 -   **Finance Tracker:** Keep track of your income and expenses.
 -   **Emergency Contacts:** A place to store important contacts for emergencies.
 -   **Travel Planner:** Plan your trips and adventures.
--   **Learning Hub:** Organize your learning resources and track your progress and update.
+-   **Learning Hub:** Organize your learning resources and track your progress.
 
 ## Technologies Used
 
@@ -26,7 +26,16 @@ LifeSync is a personal dashboard to organize your daily tasks, finances, and tra
 -   [Express](https://expressjs.com/) - A minimal and flexible Node.js web application framework.
 -   [MySQL](https://www.mysql.com/) - An open-source relational database management system.
 
-## Setup and Installation
+## Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+-   Node.js and npm installed
+-   MySQL database
+
+### Installation
 
 1.  **Clone the repository:**
     ```bash
@@ -50,11 +59,11 @@ LifeSync is a personal dashboard to organize your daily tasks, finances, and tra
     ```
 5.  **Install frontend dependencies:**
     ```bash
-    cd ../frontend
+    cd ../forntend
     npm install
     ```
 
-## Running the Application
+### Running the Application
 
 1.  **Start the backend server:**
     ```bash
@@ -63,15 +72,52 @@ LifeSync is a personal dashboard to organize your daily tasks, finances, and tra
     ```
 2.  **Start the frontend development server:**
     ```bash
-    cd ../frontend
+    cd ../forntend
     npm run dev
     ```
 3.  Open your browser and navigate to `http://localhost:3000`.
 
----
+## Project Structure
 
-## Contributors and Role ✨
+```
+/
+├── backend/
+│   ├── controller/
+│   ├── db/
+│   ├── routes/
+│   └── ...
+└── forntend/
+    ├── app/
+    │   ├── (afterAuth)/
+    │   ├── login/
+    │   └── signup/
+    └── ...
+```
 
-- [Khaled Hasan Milu](https://github.com/khaledhasanmilu)  
-- [Sumiya Akter Subarna](https://github.com/Subarna-007)  
-- [Minhazul Islam Sizan](https://github.com/sizan2119254)  
+## API Endpoints
+
+The base URL for all the endpoints is `/users`.
+
+-   `GET /`: Get all users.
+-   `POST /signup`: Create a new user.
+-   `POST /login`: Log in a user.
+
+For more details on the API, please refer to the `API_DOCUMENTATION.md` file.
+
+## Pages
+
+-   **/login:** User authentication page.
+-   **/signup:** User registration page.
+-   **/dashboard:** The main dashboard with an overview of all features.
+-   **/todo:** A page to manage your to-do list.
+-   **/finance:** A page to track your finances.
+-   **/emergency:** A page to store emergency contacts.
+-   **/travel:** A page to plan your travels.
+-   **/learning:** A page to organize your learning materials.
+-   **/quickdock:** A page for quick access to your most used features.
+
+## Contributors
+
+-   [Khaled Hasan Milu](https://github.com/khaledhasanmilu)
+-   [Sumiya Akter Subarna](https://github.com/Subarna-007)
+-   [Minhazul Islam Sizan](https://github.com/sizan2119254)
